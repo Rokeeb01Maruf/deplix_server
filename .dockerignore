@@ -6,3 +6,5 @@ __pycache__/
 .env.example
 .git
 *.pyc
+.git/
+db.sqlite3
