@@ -15,6 +15,7 @@ class SignUpSerializer(serializers.ModelSerializer):
     def validate_password(self, value):
         if len(value) < 8 :
             raise serializers.ValidationError("password is too short")
+        return value
 
     def create(self, validated_data):
         return User.objects.create_user(**validated_data)

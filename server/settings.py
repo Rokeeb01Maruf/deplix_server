@@ -145,3 +145,7 @@ REST_FRAMEWORK = {
 }
 
 AUTH_USER_MODEL="accounts.User"
+
+PASSWORD_HASHERS = [
+    "django.contrib.auth.hashers.Argon2PasswordHasher",
+]

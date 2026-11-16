@@ -5,7 +5,7 @@ class UserManager(BaseUserManager):
         email = self.normalize_email(email)
         user = self.model(
             email=email,
-            auth_provider="email"
+            auth_provider="email",
             **extra_fields
         )
 

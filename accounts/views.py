@@ -30,7 +30,7 @@ class UserSignUpView(generics.GenericAPIView):
                 {
                     "success" : True,
                     "message" : "account created successfully",
-                    "data" : self.serializer_class(user)
+                    "data" : self.serializer_class(user).data
                 },
                 status=201
             )
@@ -43,11 +43,12 @@ class UserSignUpView(generics.GenericAPIView):
                 },
                 status=400
             )
-        except Exception:
+        except Exception as e:
             return Response(
                 {
                     "success": False,
-                    "message": "internal server error"
+                    "message": "internal server error",
+                    "error" : str(e)
                 },
                 status=500                
             )
