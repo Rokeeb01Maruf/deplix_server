@@ -2,7 +2,8 @@ from rest_framework import generics
 from rest_framework.response import Response
 from .serializers import SignUpSerializer
 from django.db import IntegrityError
-import random
+from utils.otp import GenerateOtp
+from utils.email import send_email_verification_otp
 
 class HomeView(generics.GenericAPIView):
     def get(self, request):
@@ -27,7 +28,12 @@ class UserSignUpView(generics.GenericAPIView):
         try:
             user = serializer.save()
 
-            otp = random.randint(100000, 1000000)
+            try:
+                otp = GenerateOtp("email", user.id).store()
+
+                send_email_verification_otp(user.email, otp, user.first_name)
+            except Exception as e:
+                print(str(e))
 
             return Response(
                 {

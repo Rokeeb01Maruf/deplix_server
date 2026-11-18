@@ -6,6 +6,7 @@ class SignUpSerializer(serializers.ModelSerializer):
         model = User
         fields = ["email", "first_name", "last_name", "password"]
         extra_kwargs = {
+            "id" : {"read_only" : True},
             "password" : { "write_only" : True },
             "email" : { "validators" : [] },
             "first_name" : { "required" : True },
