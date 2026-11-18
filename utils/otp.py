@@ -1,50 +1,27 @@
-import secrets
 import hashlib
 import hmac
 from decouple import config
 from server.redis import redis_client
 
-class GenerateOtp:
-    def __init__(self, purpose, user_id):
-        self.purpose=purpose
-        self.user_id = user_id
-        self.secret = config("OTP_SECRET_KEY")
-
-    def generate(self):
-        self.otp = f"{secrets.randbelow(1_000_000):06d}"
-        return self.otp
-
-    def hash(self):
-        digest = hmac.new(
-            self.secret.encode(),
-            self.otp.encode(),
+def hash_otp(otp):
+    secret = config("OTP_SECRET_KEY")
+    return hmac.new(
+            secret.encode(),
+            otp.encode(),
             hashlib.sha256
         ).hexdigest()
 
-        self.digest = digest
+def store_otp(user_id, purpose, hash):
+    key = f"otp:{purpose}:{user_id}"
+    redis_client.set(
+        key,
+        hash,
+        ex=300
+    )
 
-    def store(self):
-        self.generate()
-        self.hash()
-        redis_client.set(
-            f"otp:{self.purpose}:{self.user_id}",
-            self.digest,
-            ex=300
-        )
+def retrieve_otp(user_id, purpose):
+    key = f"otp:{purpose}:{user_id}"
+    return redis_client.get(key)
 
-        return self.otp
-
-class VerifyOtp:
-    def __init__(self, purpose, user_id, otp):
-        self.purpose = purpose
-        self.user_id = user_id
-        self.otp = otp
-
-    def retrieve(self):
-        self.digest = redis_client.get(f"otp:{self.purpose}:{self.user_id}")
-
-    def verify(self):
-        if self.digest == None:
-            return None
-
-        return hmac.compare_digest(self.otp, self.digest)
+def verify_otp(digested, digest):
+    return hmac.compare_digest(digested, digest)
