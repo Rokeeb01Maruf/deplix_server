@@ -5,7 +5,8 @@ from django.db import IntegrityError
 from utils.otp import hash_otp, store_otp, retrieve_otp, verify_otp
 from utils.email import send_email_verification_otp
 import secrets
-from .models import User
+from rest_framework_simplejwt.tokens import RefreshToken
+
 
 class HomeView(generics.GenericAPIView):
     def get(self, request):
@@ -115,13 +116,18 @@ class EmailVerifyView(generics.GenericAPIView):
                 status=500
             )
 
+        tokens = RefreshToken.for_user(user)
+
         return Response(
             {
                 "success" : True,
                 "message" : "email verified successfully",
                 "data" : {
-                    "id": user.id,
-                    "email": user.email
+                    "id": user.id
+                },
+                "tokens" : {
+                    "access" : str(tokens.access_token),
+                    "refresh" : str(tokens)
                 }
             },
             status=200
