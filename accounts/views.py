@@ -2,6 +2,7 @@ from rest_framework import generics
 from rest_framework.response import Response
 from .serializers import SignUpSerializer
 from django.db import IntegrityError
+import random
 
 class HomeView(generics.GenericAPIView):
     def get(self, request):
@@ -25,6 +26,8 @@ class UserSignUpView(generics.GenericAPIView):
 
         try:
             user = serializer.save()
+
+            otp = random.randint(100000, 1000000)
 
             return Response(
                 {

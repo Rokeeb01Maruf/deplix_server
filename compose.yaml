@@ -9,10 +9,14 @@ services :
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_PORT: ${POSTGRES_PORT}
       POSTGRES_HOST: ${POSTGRES_HOST}
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+      REDIS_DB: ${REDIS_DB}
     ports: 
     - "8000:8000"
     volumes:
     - .:/app
+    - vscode_extensions:/root/.vscode-server/extensions
 
   db:
     image: postgres:18
@@ -35,3 +39,4 @@ services :
 
 volumes:
   postgres_data:
+  vscode_extensions:

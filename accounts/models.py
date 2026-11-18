@@ -3,9 +3,6 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser, PermissionsMixin
 from .managers import UserManager
 
-class Business(models.Model):
-    pass
-
 
 class User(AbstractUser):
     USER_CHOICES = (("admin", "admin"), ("user", "user"))
@@ -27,3 +24,6 @@ class User(AbstractUser):
     USERNAME_FIELD="email"
 
     objects = UserManager()
+
+    class Meta:
+        db_table="users"
