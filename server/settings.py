@@ -42,6 +42,7 @@ INSTALLED_APPS = [
 
     # APPS
     'accounts',
+    'users',
 
     # FRAMEWORKS
     'rest_framework',
