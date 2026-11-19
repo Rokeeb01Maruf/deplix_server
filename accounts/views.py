@@ -210,7 +210,8 @@ class PasswordResetView(generics.GenericAPIView):
         return PasswordResetSerializer
 
     def post(self, request):
-        serializers = self.serializer_class(data=request.data)
+        serializer_class = PasswordRequestSerializer
+        serializers = serializer_class(data=request.data)
 
         if not serializers.is_valid():
             return Response(
@@ -248,7 +249,8 @@ class PasswordResetView(generics.GenericAPIView):
             )
 
     def patch(self, request):
-        serializers = self.serializer_class
+        serializer_class = PasswordResetSerializer
+        serializers = serializer_class(data=request.data)
 
         if not serializers.is_valid():
             return Response(
@@ -283,7 +285,8 @@ class PasswordResetView(generics.GenericAPIView):
                     status=200
                 )
             
-            except Exception:
+            except Exception as e:
+                print(str(e))
                 return Response(
                     {
                         "success" : False,
@@ -327,11 +330,12 @@ class ResetVerifyView(generics.GenericAPIView):
             user_id = user.id
             
             try:
-                digested = retrieve_otp(user_id=user_id, purpose="email")
+                digested = retrieve_otp(user_id=user_id, purpose="password")
                 if digested == None: raise ValueError("invalid")
                 verify = verify_otp(digested=digested, digest=hash_otp(otp))
                 if not verify: raise ValueError("invalid")
-            except ValueError:
+            except Exception as e:
+                print(str(e))
                 return Response({
                     "success" : False,
                     "message" : "bad request",

@@ -54,8 +54,8 @@ class ResetVerifySerializer(serializers.Serializer):
     otp = serializers.CharField(max_length=6, min_length=6)
     email = serializers.EmailField()
 
-    def create(self):
-        return User.objects.get('email')
+    def create(self, validated_data):
+        return User.objects.get(email=validated_data.get("email"))
 
 class PasswordResetSerializer(serializers.Serializer):
     email = serializers.EmailField()
@@ -63,7 +63,7 @@ class PasswordResetSerializer(serializers.Serializer):
     password = serializers.CharField(min_length=8)
 
     def create(self, validated_data):
-        user = User.objects.get(id=validated_data.get("email"))
+        user = User.objects.get(email=validated_data.get("email"))
 
         user.set_password(validated_data.get("password"))
         user.save(update_fields=["password"])

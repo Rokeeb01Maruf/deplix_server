@@ -21,7 +21,10 @@ def store_otp(user_id, purpose, hash):
 
 def retrieve_otp(user_id, purpose):
     key = f"otp:{purpose}:{user_id}"
-    return redis_client.get(key)
+    data = redis_client.get(key)
+    if data:
+        redis_client.delete(key)
+    return data
 
 def verify_otp(digested, digest):
     return hmac.compare_digest(digested, digest)
