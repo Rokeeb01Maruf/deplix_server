@@ -422,3 +422,21 @@ class PasswordChangeView(generics.GenericAPIView):
                 },
                 status=500
             )
+
+
+class LogoutView(generics.GenericAPIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request):
+        user = request.user
+
+        refresh = RefreshToken.for_user(user)
+        refresh
+
+        return Response(
+            {
+                "success" : True,
+                "message" : "user successfully logout",
+                "data" : {}
+            },
+            status=200
+        )
