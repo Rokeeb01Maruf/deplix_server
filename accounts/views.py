@@ -1,6 +1,6 @@
 from rest_framework import generics
 from rest_framework.response import Response
-from .serializers import SignUpSerializer, EmailVerificationSerializer, SigninSerializer, PasswordRequestSerializer, PasswordResetSerializer, ResetVerifySerializer, PasswordChangeSerializer
+from .serializers import SignUpSerializer, EmailVerificationSerializer, SigninSerializer, PasswordRequestSerializer, PasswordResetSerializer, ResetVerifySerializer, PasswordChangeSerializer, LogoutSerializer
 from django.db import IntegrityError
 from utils.otp import hash_otp, store_otp, retrieve_otp, verify_otp, store_reset_token, retrieve_reset_token
 from utils.email import send_email_verification_otp, send_password_reset_otp
@@ -426,11 +426,24 @@ class PasswordChangeView(generics.GenericAPIView):
 
 class LogoutView(generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
-    def get(self, request):
+    serializer_class = LogoutSerializer
+    def post(self, request):
         user = request.user
 
-        refresh = RefreshToken.for_user(user)
-        refresh
+        serializer = self.serializer_class(data=request.data)
+
+        if not serializer.is_valid():
+            return Response(
+                {
+                    "success" : False,
+                    "message" : "bad request",
+                    "errors" : serializer.errors
+                },
+                status=400
+            )
+
+        token = RefreshToken(serializer.validated_data.get("refresh"))
+        token.blacklist()
 
         return Response(
             {

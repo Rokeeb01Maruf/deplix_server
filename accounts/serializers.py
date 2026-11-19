@@ -86,3 +86,5 @@ class PasswordChangeSerializer(serializers.Serializer):
 
         return user
 
+class LogoutSerializer(serializers.Serializer):
+    refresh = serializers.CharField()
