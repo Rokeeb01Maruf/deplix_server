@@ -39,7 +39,7 @@ class EmailVerificationSerializer(serializers.Serializer):
 
 class SigninSerializer(serializers.Serializer):
     email = serializers.EmailField()
-    password = serializers.CharField(min_length=8)
+    password = serializers.CharField()
 
     def create(self, validated_data):
         return User.objects.get(email=validated_data.get("email"))
@@ -66,6 +66,22 @@ class PasswordResetSerializer(serializers.Serializer):
         user = User.objects.get(email=validated_data.get("email"))
 
         user.set_password(validated_data.get("password"))
+        user.save(update_fields=["password"])
+
+        return user
+
+class PasswordChangeSerializer(serializers.Serializer):
+    old_password = serializers.CharField()
+    new_password = serializers.CharField(min_length=8)
+
+
+    def create(self, validated_data):
+        user = self.context.get("user")
+
+        if not user.check_password(validated_data.get("old_password")):
+            raise ValueError("invalid password")
+
+        user.set_password(validated_data.get("new_password"))
         user.save(update_fields=["password"])
 
         return user

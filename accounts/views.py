@@ -1,12 +1,13 @@
 from rest_framework import generics
 from rest_framework.response import Response
-from .serializers import SignUpSerializer, EmailVerificationSerializer, SigninSerializer, PasswordRequestSerializer, PasswordResetSerializer, ResetVerifySerializer
+from .serializers import SignUpSerializer, EmailVerificationSerializer, SigninSerializer, PasswordRequestSerializer, PasswordResetSerializer, ResetVerifySerializer, PasswordChangeSerializer
 from django.db import IntegrityError
 from utils.otp import hash_otp, store_otp, retrieve_otp, verify_otp, store_reset_token, retrieve_reset_token
 from utils.email import send_email_verification_otp, send_password_reset_otp
 import secrets
 from rest_framework_simplejwt.tokens import RefreshToken
 from .models import User
+from rest_framework.permissions import IsAuthenticated
 
 
 class HomeView(generics.GenericAPIView):
@@ -376,3 +377,48 @@ class ResetVerifyView(generics.GenericAPIView):
                 status=500
             )
 
+class PasswordChangeView(generics.GenericAPIView):
+    serializer_class = PasswordChangeSerializer
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request):
+        serializer = self.serializer_class(data=request.data, context={"user" : request.user})
+
+        if not serializer.is_valid():
+            return Response(
+                {
+                    "success" : False,
+                    "message" : "bad request",
+                    "error" : serializer.errors
+                },
+                status=400
+            )
+
+        try:
+            user = serializer.save()
+            return Response(
+                {
+                    "success" : True,
+                    "message" : "password reset successfully",
+                    "data" : {}
+                }
+            )
+        except ValueError as e:
+            return Response(
+                {
+                    "success" : False,
+                    "message" : "bad request",
+                    "errors" : str(e)
+                },
+                status=400
+            )
+        except Exception as e:
+            print(str(e))
+            return Response(
+                {
+                    "success" : False,
+                    "message" : "internal server error",
+                    "errors" : "server failed to change password"
+                },
+                status=500
+            )
