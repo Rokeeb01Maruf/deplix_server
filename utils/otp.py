@@ -25,3 +25,21 @@ def retrieve_otp(user_id, purpose):
 
 def verify_otp(digested, digest):
     return hmac.compare_digest(digested, digest)
+
+def store_reset_token(userid, purpose, token):
+    key = f"token:{purpose}:{userid}"
+
+    redis_client.set(
+        key,
+        token,
+        ex=300
+    )
+
+def retrieve_reset_token(userid, purpose):
+    key = f"token:{purpose}:{userid}"
+    token = redis_client.get(key)
+
+    if token:
+        redis_client.delete(key)
+
+    return token
