@@ -1,11 +1,12 @@
 from rest_framework import generics
 from rest_framework.response import Response
-from .serializers import SignUpSerializer, EmailVerificationSerializer
+from .serializers import SignUpSerializer, EmailVerificationSerializer, SigninSerializer
 from django.db import IntegrityError
 from utils.otp import hash_otp, store_otp, retrieve_otp, verify_otp
 from utils.email import send_email_verification_otp
 import secrets
 from rest_framework_simplejwt.tokens import RefreshToken
+from .models import User
 
 
 class HomeView(generics.GenericAPIView):
@@ -133,4 +134,70 @@ class EmailVerifyView(generics.GenericAPIView):
             status=200
         )
 
-        
+class SigninView(generics.GenericAPIView):
+    serializer_class = SigninSerializer
+    def post(self, request):
+        serializers = self.serializer_class(data=request.data)
+
+        if not serializers.is_valid():
+            return Response(
+                {
+                    "success" : False,
+                    "message" : "bad request",
+                    "errors" : serializers.errors
+                },
+                status=400
+            )
+
+        try:
+            user = serializers.save()
+
+            if not user.is_email_verified:
+                return Response(
+                    {
+                        "success" : False,
+                        "message" : "bad request",
+                        "errors" : "email is unverified"
+                    },
+                    status=400
+                )
+
+            if not user.is_active:
+                return Response(
+                    {
+                        "success" : False,
+                        "message" : "unauthorized",
+                        "error" : "You are not permitted to perform this action"
+                    },
+                    status=401
+                )
+
+            if not user.check_password(serializers.validated_data.get("password")):
+                raise User.DoesNotExist("invalid")
+
+        except User.DoesNotExist:
+            return Response(
+                {
+                    "success" : False,
+                    "message" : "bad request",
+                    "errors" : "invalid email or password"
+                },
+                status=400
+            )
+
+        tokens = RefreshToken.for_user(user=user)
+
+        return Response(
+            {
+                "success" : True,
+                "message" : "signin successful",
+                "data" : {
+                    "id" : user.id
+                },
+                "tokens" : {
+                    "access" : str(tokens.access_token),
+                    "refresh" : str(tokens)
+                }
+            },
+            status=200
+        )

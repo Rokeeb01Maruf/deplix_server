@@ -36,3 +36,10 @@ class EmailVerificationSerializer(serializers.Serializer):
         user.save(update_fields=["is_email_verified"])
 
         return user
+
+class SigninSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField(min_length=8)
+
+    def create(self, validated_data):
+        return User.objects.get(email=validated_data.get("email"))
