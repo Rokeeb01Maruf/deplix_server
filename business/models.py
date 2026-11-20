@@ -9,11 +9,11 @@ class Business(models.Model):
     BUSINESS_TYPES = (("retail", "retail"), ("wholesale", "wholesale"), ("mixed", "mixed"), ("distribution" ,"distribution"),("other", "other"))
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=150)
     email = models.EmailField()
-    type = models.CharField(choices=BUSINESS_TYPES)
+    type = models.CharField(choices=BUSINESS_TYPES, max_length=12)
     logo = models.URLField(blank=True, max_length=500)
-    phone = models.CharField(max_length=50, blank=True)
+    phone = models.CharField(max_length=20, blank=True)
     owner = models.OneToOneField(
         User,
         on_delete=models.PROTECT,
