@@ -2,8 +2,11 @@ import uuid
 from django.db import models
 from accounts.models import User
 from business.models import Business
+from branch.models import Branch
 
 class Employee(models.Model):
+    class Meta:
+        db_table='employee'
 
     ROLE_CHOICES = (("owner", "owner"), ("bm", "bm"), ("staff", "staff"))
 
@@ -16,6 +19,11 @@ class Employee(models.Model):
     role = models.CharField(choices=ROLE_CHOICES, max_length=6)
     business = models.ForeignKey(
         Business,
+        on_delete=models.PROTECT,
+        related_name='employees'
+    )
+    branch = models.ForeignKey(
+        Branch,
         on_delete=models.PROTECT,
         related_name='employees'
     )
