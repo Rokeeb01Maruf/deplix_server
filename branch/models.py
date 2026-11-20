@@ -27,7 +27,7 @@ class Branch(models.Model):
         constraints = [
             models.UniqueConstraint(
                 Lower("name"),
-                fields=["business", "name"],
+                "business",
                 name="unique_branch_per_business"
             )
         ]
