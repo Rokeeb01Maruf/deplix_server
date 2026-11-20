@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'accounts',
     'users',
     'business',
+    'employee',
 
     # FRAMEWORKS
     'rest_framework',
