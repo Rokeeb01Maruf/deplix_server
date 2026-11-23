@@ -1,12 +1,12 @@
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from .serializers import CreateBusinessSerializer
+from .serializers import BusinessSerializer
 from rest_framework.generics import GenericAPIView
 from .models import Business
 from django.db import IntegrityError
 
 class BusinessView(GenericAPIView):
-    serializer_class = CreateBusinessSerializer
+    serializer_class = BusinessSerializer
     permission_classes = [IsAuthenticated]
 
     def get_business(self, user):
@@ -114,3 +114,4 @@ class BusinessView(GenericAPIView):
                 },
                 status=500
             )
+
