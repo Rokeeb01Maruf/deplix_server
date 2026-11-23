@@ -9,8 +9,22 @@ class BusinessView(GenericAPIView):
     serializer_class = CreateBusinessSerializer
     permission_classes = [IsAuthenticated]
 
+    def get_business(self, user):
+        return Business.objects.get(owner=user)
+
     def get(self, request):
-        business_data = Business.objects.get(owner=request.user)
+        try:
+            business_data = self.get_business(request.user)
+
+        except Business.DoesNotExist:
+            return Response(
+                {
+                    "success" : True,
+                    "message" : "business data not found",
+                    "data" : {}
+                },
+                status=404
+            )
 
         serializer = self.serializer_class(business_data)
 
@@ -62,6 +76,41 @@ class BusinessView(GenericAPIView):
                     "success" : False,
                     "message" : "internal server error",
                     "errors" : "server failed to create business"
+                },
+                status=500
+            )
+
+    def patch(self, request):
+        business_data = self.get_business(request.user)
+        serializer = self.serializer_class(business_data ,data=request.data, partial=True)
+
+        if not serializer.is_valid():
+            return Response(
+                {
+                    "success" : False,
+                    "message" : "bad request",
+                    "errors" : serializer.errors
+                },
+                status=400
+            )
+
+        try:
+            business = serializer.save()
+
+            return Response(
+                {
+                    "success" : True,
+                    "message" : "business data updated successfully",
+                    "data" : self.serializer_class(business).data
+                }
+            )
+        except Exception as e:
+            print(str(e))
+            return Response(
+                {
+                    "success" : False,
+                    "message" : "internal server error",
+                    "errors" : "server failed to update business data"
                 },
                 status=500
             )

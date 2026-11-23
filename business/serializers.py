@@ -9,6 +9,7 @@ class CreateBusinessSerializer(serializers.ModelSerializer):
     class Meta:
         model = Business
         fields = "__all__"
+        read_only_fields = ["id", "is_active", "branches", "owner"]
         extra_kwargs = {
             "id" : { "read_only" : True },
             "owner" : { "read_only" : True },
