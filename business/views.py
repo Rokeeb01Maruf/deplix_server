@@ -3,18 +3,16 @@ from rest_framework.permissions import IsAuthenticated
 from .serializers import CreateBusinessSerializer
 from rest_framework.generics import GenericAPIView
 from .models import Business
+from django.db import IntegrityError
 
 class BusinessView(GenericAPIView):
     serializer_class = CreateBusinessSerializer
     permission_classes = [IsAuthenticated]
 
-    def get_queryset(self):
-        return Business.objects.prefetch_related("branch").all()
-
     def get(self, request):
-        business_data = self.get_queryset()
+        business_data = Business.objects.get(owner=request.user)
 
-        serializer = self.get_serializer(business_data, many=True)
+        serializer = self.serializer_class(business_data)
 
         return Response(
             {
@@ -48,7 +46,7 @@ class BusinessView(GenericAPIView):
                 },
                 status=201
             )
-        except InterruptedError:
+        except IntegrityError:
             return Response(
                 {
                     "success" : False,
@@ -58,7 +56,7 @@ class BusinessView(GenericAPIView):
                 status=400
             )
         except Exception as e:
-            print(str(e))
+            print(type(e).__name__)
             return Response(
                 {
                     "success" : False,

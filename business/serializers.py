@@ -2,14 +2,16 @@ from rest_framework import serializers
 from branch.models import Branch
 from .models import Business
 from django.db import transaction
+from branch.serializers import BranchSerializer
 
 class CreateBusinessSerializer(serializers.ModelSerializer):
+    branches = BranchSerializer(many=True, read_only=True)
     class Meta:
         model = Business
         fields = "__all__"
         extra_kwargs = {
             "id" : { "read_only" : True },
-            "owner" : { "read_only" : True }
+            "owner" : { "read_only" : True },
         }
 
     def create(self, validated_data):
