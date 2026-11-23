@@ -10,7 +10,7 @@ class Business(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=150)
-    email = models.EmailField()
+    email = models.EmailField(blank=True)
     type = models.CharField(choices=BUSINESS_TYPES, max_length=12)
     logo = models.URLField(blank=True, max_length=500)
     phone = models.CharField(max_length=20, blank=True)
