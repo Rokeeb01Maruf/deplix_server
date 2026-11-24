@@ -1,7 +1,7 @@
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from .serializers import BranchSerializer
-from .permissions import IsOwner
+from .permissions import IsOwner, IsEmployee
 from .models import Branch
 from django.db import IntegrityError
 
@@ -71,16 +71,20 @@ class BranchView(GenericAPIView):
 
 class SingleBranchSerializer(GenericAPIView):
     serializer_class = BranchSerializer
+    permission_classes = IsEmployee
 
     def get(self, request):
         try:
-            branches = request.user.employee_records.filter(is_active=True)
+            if not request.branch:
+                branches = request.user.employee_records.filter(is_active=True)
 
-            if len(branches) < 0:
-                raise ValueError("user has no active employee record")
-            
-            branch_id = branches[0].id
-            branch = Branch.objects.get(id=branch_id)
+                if len(branches) < 0:
+                    raise ValueError("user has no active employee record")
+                
+                branch_id = branches[0].id
+                branch = Branch.objects.get(id=branch_id)
+            else:
+                branch = request.branch
 
             return Response(
                 {
