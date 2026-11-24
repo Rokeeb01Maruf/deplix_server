@@ -67,3 +67,52 @@ class BranchView(GenericAPIView):
                 },
                 status=500
             )
+
+
+class SingleBranchSerializer(GenericAPIView):
+    serializer_class = BranchSerializer
+
+    def get(self, request):
+        try:
+            branches = request.user.employee_records.filter(is_active=True)
+
+            if len(branches) < 0:
+                raise ValueError("user has no active employee record")
+            
+            branch_id = branches[0].id
+            branch = Branch.objects.get(id=branch_id)
+
+            return Response(
+                {
+                    "success" : True,
+                    "message" : "branch data fetched successfully",
+                    "data" : self.serializer_class(branch).data
+                },
+                status=200
+            )
+        except (Branch.DoesNotExist, ValueError):
+            return Response(
+                {
+                    "success" : True,
+                    "message" : "branch data fetched successfully",
+                    "data" : {}
+                },
+                status=200
+            )
+
+        except Exception as e:
+            print(str(e))
+            return Response(
+                {
+                    "success" : False,
+                    "message" : "internal server error",
+                    "errors" : "server failed to fetch branches"
+                }
+            )
+
+
+    def post(self, request):
+        pass
+
+    def patch(self, request):
+        pass
