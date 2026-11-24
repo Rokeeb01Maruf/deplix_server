@@ -71,9 +71,9 @@ class BranchView(GenericAPIView):
 
 class SingleBranchSerializer(GenericAPIView):
     serializer_class = BranchSerializer
-    permission_classes = IsEmployee
+    permission_classes = [IsEmployee]
 
-    def get(self, request):
+    def get(self, request, branch_id):
         try:
             if not request.branch:
                 branches = request.user.employee_records.filter(is_active=True)
