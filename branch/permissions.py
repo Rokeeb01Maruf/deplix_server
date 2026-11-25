@@ -54,7 +54,7 @@ class IsEmployee(BasePermission):
             request.branch = branch
             return True
 
-class IsPatch(IsEmployee):
+class IsBranchOwnerOrBM(IsEmployee):
     def has_permission(self, request, view):
         branch_id = view.kwargs.get("branch_id")
 

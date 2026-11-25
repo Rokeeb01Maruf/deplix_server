@@ -1,7 +1,7 @@
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from .serializers import BranchSerializer
-from .permissions import IsOwner, IsEmployee
+from .permissions import IsOwner, IsEmployee, IsBranchOwnerOrBM
 from .models import Branch
 from django.db import IntegrityError
 
@@ -73,6 +73,14 @@ class SingleBranchSerializer(GenericAPIView):
     serializer_class = BranchSerializer
     permission_classes = [IsEmployee]
 
+    def get_permissions(self):
+        if self.request.method == "GET":
+            permission_classes = IsEmployee
+        elif self.request.method == "PATCH":
+            permission_classes = IsBranchOwnerOrBM
+
+        return [permission() for permission in permission_classes]
+
     def get(self, request, branch_id):
         try:
             if not request.branch:
@@ -114,9 +122,42 @@ class SingleBranchSerializer(GenericAPIView):
                 }
             )
 
-
-    def post(self, request):
-        pass
-
     def patch(self, request):
-        pass
+        if request.branch:
+            branch = request.branch
+        else:
+            branch = request.user.employee_records.get(is_active=True)
+
+        serilalizer = self.serializer_class(branch, data=request.data, partial=True)
+
+        if not serilalizer.is_valid():
+            return Response(
+                {
+                    "success" : False,
+                    "message" : "bad request",
+                    "errors" : serilalizer.errors
+                },
+                status=400
+            )
+
+        try:
+            branch = serilalizer.save()
+
+            return Response(
+                {
+                    "success" : True,
+                    "message" : "branch data updated successfully",
+                    "data" : self.serializer_class(branch).data
+                },
+                status=200
+            )
+        except Exception as e:
+            print(str(e))
+            return Response(
+                {
+                    "success" : False,
+                    "message" : "internal server error",
+                    "errors" : "server failed to update branch data"
+                },
+                status=500
+            )
