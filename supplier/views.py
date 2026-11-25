@@ -1,3 +1,9 @@
-from django.shortcuts import render
+class SupplierView:
+    def get(self, request):
+        pass
 
-# Create your views here.
+    def post(self, request):
+        pass
+    
+    def patch(self, request):
+        pass
