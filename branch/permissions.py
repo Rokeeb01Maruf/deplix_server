@@ -53,3 +53,24 @@ class IsEmployee(BasePermission):
                 return False
             request.branch = branch
             return True
+
+class IsPatch(IsEmployee):
+    def has_permission(self, request, view):
+        branch_id = view.kwargs.get("branch_id")
+
+        employee = request.user.employee_records.filter(is_active=True).first()
+
+        if not employee:
+            return False
+
+        if employee.role == "staff":
+            return False
+
+        if employee.role == "bm" and branch_id != "my_branch":
+            return False
+
+        if employee.role == "owner" and not self.is_valid_uuid(branch_id):
+            return False
+        else:
+            request.branch == Branch.objects.get(id=branch_id, business=employee.business)
+            return True
