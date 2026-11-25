@@ -72,5 +72,5 @@ class IsBranchOwnerOrBM(IsEmployee):
         if employee.role == "owner" and not self.is_valid_uuid(branch_id):
             return False
         else:
-            request.branch == Branch.objects.get(id=branch_id, business=employee.business)
+            request.branch = Branch.objects.get(id=branch_id, business=employee.business)
             return True

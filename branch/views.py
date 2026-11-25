@@ -75,9 +75,9 @@ class SingleBranchSerializer(GenericAPIView):
 
     def get_permissions(self):
         if self.request.method == "GET":
-            permission_classes = IsEmployee
+            permission_classes = [IsEmployee]
         elif self.request.method == "PATCH":
-            permission_classes = IsBranchOwnerOrBM
+            permission_classes = [IsBranchOwnerOrBM]
 
         return [permission() for permission in permission_classes]
 
@@ -122,7 +122,7 @@ class SingleBranchSerializer(GenericAPIView):
                 }
             )
 
-    def patch(self, request):
+    def patch(self, request, branch_id):
         if request.branch:
             branch = request.branch
         else:
