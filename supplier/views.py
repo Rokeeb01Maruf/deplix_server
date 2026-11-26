@@ -21,7 +21,7 @@ class SupplierView(GenericAPIView):
                 status=401
             )
         try:
-            query = Supplier.objects.filter(business=business)
+            query = Supplier.objects.filter(business=business).order_by("created_at")
             page = self.paginate_queryset(query)
 
             serializer = self.serializer_class(page, many=True)
@@ -50,7 +50,7 @@ class SupplierView(GenericAPIView):
                 status=401
             )
 
-        serializer = self.serializer_class(data=request.data, context={"business" : business})
+        serializer = self.serializer_class(data=request.data, context={"business" : business.business})
 
         if not serializer.is_valid():
             return Response(

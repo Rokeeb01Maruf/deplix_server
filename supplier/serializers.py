@@ -8,7 +8,8 @@ class SupplierSerializer(serializers.ModelSerializer):
         read_only_fields = ["id", "is_active"]
         extra_kwargs = {
             "id" : { "read_only" : True },
-            "is_active" : {"read_only" : True}
+            "is_active" : {"read_only" : True},
+            "business" : {"read_only" : True}
         }
 
     def create(self, validated_data):
