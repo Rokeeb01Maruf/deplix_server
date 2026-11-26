@@ -2,12 +2,38 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from .serializers import SupplierSerializer
 from django.db import IntegrityError
+from .models import Supplier
+from .permissions import IsActiveEmployee
 
 class SupplierView(GenericAPIView):
     serializer_class = SupplierSerializer
-
+    permission_classes = [IsActiveEmployee]
     def get(self, request):
-        pass
+        try:
+            business = request.user.employee_records.get(is_active=True).business
+        except Exception:
+            return Response(
+                {
+                    "success" : False,
+                    "message" : "unauthorized",
+                    "errors" : "you are unauthorized to perform this action"
+                },
+                status=401
+            )
+        
+        query = Supplier.objects.filter(business=business)
+        page = self.paginate_queryset(query)
+
+        serializer = self.serializer_class(page, many=True)
+
+        return Response(
+            {
+                "success" : True,
+                "message" : "supplier's data returned successfully",
+                "data" : self.get_paginated_response(serializer.data)
+            },
+            status=200
+        )
 
     def post(self, request):
         business = request.user.employee_records.filter(is_active=True).first()
@@ -65,7 +91,3 @@ class SupplierView(GenericAPIView):
                 },
                 status=500
             )
-
-
-    def patch(self, request):
-        pass
