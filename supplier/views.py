@@ -20,20 +20,22 @@ class SupplierView(GenericAPIView):
                 },
                 status=401
             )
-        
-        query = Supplier.objects.filter(business=business)
-        page = self.paginate_queryset(query)
+        try:
+            query = Supplier.objects.filter(business=business)
+            page = self.paginate_queryset(query)
 
-        serializer = self.serializer_class(page, many=True)
+            serializer = self.serializer_class(page, many=True)
 
-        return Response(
-            {
-                "success" : True,
-                "message" : "supplier's data returned successfully",
-                "data" : self.get_paginated_response(serializer.data)
-            },
-            status=200
-        )
+            return self.get_paginated_response(serializer.data)
+        except Exception as e:
+            print(str(e))
+            return Response(
+                {
+                    "success" : False,
+                    "message" : "internal server error",
+                    "errors" : str(e)
+                }
+            )
 
     def post(self, request):
         business = request.user.employee_records.filter(is_active=True).first()
@@ -43,7 +45,7 @@ class SupplierView(GenericAPIView):
                 {
                     "success" : True,
                     "message" : "unauthorized",
-                    "errors" : "no current business to perform this action on"
+                    "errors" : "user is unauthorized to perform this action"
                 },
                 status=401
             )
