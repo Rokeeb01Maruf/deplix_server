@@ -100,7 +100,7 @@ class SingleSupplierView(GenericAPIView):
 
     def get(self, request, supplier_id):
 
-        employee = request.user.employee_records.filter(is_active=True)
+        employee = request.user.employee_records.filter(is_active=True).first()
         try:
             supplier = Supplier.objects.get(id=supplier_id, business=employee.business)
             return Response(
@@ -133,14 +133,17 @@ class SingleSupplierView(GenericAPIView):
         
 
     def patch(self, request, supplier_id):
-        employee = request.user.employee_records.filter(is_active=True)
+        employee = request.user.employee_records.filter(is_active=True).first()
 
         try:
-            supplier = Supplier.objects.filter(id=supplier_id, business=employee.business)
+            supplier = Supplier.objects.get(id=supplier_id, business=employee.business)
 
-            seriaizer = self.serializer_class(supplier, partial=True, data=request.data)
+            serializer = self.serializer_class(supplier, partial=True, data=request.data)
 
-            supplier_data = seriaizer.save()
+            if not serializer.is_valid():
+                raise ValueError(serializer.errors)
+
+            supplier_data = serializer.save()
 
             return Response(
                 {
@@ -159,6 +162,15 @@ class SingleSupplierView(GenericAPIView):
                 },
                 status=404
             )
+        except ValueError:
+            return Response(
+                {
+                    "success" : False,
+                    "message" : "bad request",
+                    "errors" : serializer.errors
+                },
+                status=400
+            )
         except Exception as e:
             print(str(e))
             return Response(
@@ -166,5 +178,6 @@ class SingleSupplierView(GenericAPIView):
                     "success" : False,
                     "message" : "internal server error",
                     "errors" : "server failed to update supplier's data"
-                }
+                },
+                status=500
             )
